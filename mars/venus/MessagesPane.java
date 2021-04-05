@@ -127,6 +127,7 @@ public class MessagesPane extends JTabbedPane {
 					if (text.startsWith(ErrorList.ERROR_MESSAGE_PREFIX) || text.startsWith(
 							ErrorList.WARNING_MESSAGE_PREFIX)) {
 						assemble.select(lineStart, lineEnd);
+						assemble.setSelectedTextColor(Color.BLACK); // sometimes the yellow background selection is too light
 						assemble.setSelectionColor(Color.YELLOW);
 						assemble.repaint();
 						final int separatorPosition = text.indexOf(ErrorList.MESSAGE_SEPARATOR);
@@ -221,6 +222,7 @@ public class MessagesPane extends JTabbedPane {
 				textLine = assemble.getLineOfOffset(textPosition);
 				lineStart = assemble.getLineStartOffset(textLine);
 				lineEnd = assemble.getLineEndOffset(textLine);
+				assemble.setSelectedTextColor(Color.BLACK); // sometimes the yellow background selection is too light
 				assemble.setSelectionColor(Color.YELLOW);
 				assemble.select(lineStart, lineEnd);
 				assemble.getCaret().setSelectionVisible(true);
@@ -378,7 +380,7 @@ public class MessagesPane extends JTabbedPane {
 
 	////////////////////////////////////////////////////////////////////////////
 	// Thread class for obtaining user input in the Run I/O window (MessagesPane)
-	// Written by Ricardo Fernández Pascual [rfernandez@ditec.um.es] December 2009.
+	// Written by Ricardo Fernï¿½ndez Pascual [rfernandez@ditec.um.es] December 2009.
 	class Asker implements Runnable {
 
 		ArrayBlockingQueue<String> resultQueue = new ArrayBlockingQueue<>(1);
