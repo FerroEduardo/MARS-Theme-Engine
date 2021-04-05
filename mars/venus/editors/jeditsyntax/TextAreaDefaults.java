@@ -73,7 +73,7 @@ public class TextAreaDefaults {
 		DEFAULTS.styles = SyntaxUtilities.getCurrentSyntaxStyles(); // was getDefaultSyntaxStyles()
 		DEFAULTS.caretColor = Color.black; // Color.red;
 		DEFAULTS.selectionColor = new Color(0xccccff);
-		DEFAULTS.lineHighlightColor = new Color(0xeeeeee);//0xe0e0e0);
+		DEFAULTS.lineHighlightColor = new Color(0x808080);
 		DEFAULTS.lineHighlight = mars.Globals.getSettings().getBooleanSetting(
 				Settings.EDITOR_CURRENT_LINE_HIGHLIGHTING);
 		DEFAULTS.bracketHighlightColor = Color.black;

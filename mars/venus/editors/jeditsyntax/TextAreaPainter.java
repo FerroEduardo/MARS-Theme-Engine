@@ -24,10 +24,12 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JComponent;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 
+import com.sun.istack.internal.NotNull;
 import mars.venus.editors.jeditsyntax.tokenmarker.Token;
 import mars.venus.editors.jeditsyntax.tokenmarker.TokenMarker;
 
@@ -63,13 +65,16 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 
 		setFont(new Font("Courier New" /*"Monospaced"*/, Font.PLAIN, 14));
-		Color bg = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_BG].getColor();
-		Color line = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_LINE].getColor();
 		Color selection = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_SELECTION].getColor();
-		Color fg = new Color(255 - bg.getRed(), 255 - bg.getGreen(), 255 - bg.getBlue());
 
-		setForeground(fg);
+		Color bg = ((Color) UIManager.get("Menu.background")).brighter();
+		double lum = this.getColorRelativeLuminance(bg);
+		// lum > 255/2.0 ? light : dark
+		Color fg = lum > 255/2.0 ? Color.black: Color.white;
+
 		setBackground(bg);
+		setForeground(fg);
+		Color line = TextAreaDefaults.getDefaults().lineHighlightColor;
 
 		tabSizeChars = defaults.tabSize;
 		blockCaret = defaults.blockCaret;
@@ -85,6 +90,13 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 		paintInvalid = defaults.paintInvalid;
 		eolMarkerColor = defaults.eolMarkerColor;
 		eolMarkers = defaults.eolMarkers;
+
+		/*
+		If any the UIManager property get changed, the editor will update the color.
+		That is, the editor color will be updated if the theme get changed.
+		*/
+		UIManager.addPropertyChangeListener(event -> updateColors());
+
 	}
 
 	/**
@@ -684,10 +696,11 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 	}
 
 	public void updateColors() {
-		Color bg = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_BG].getColor();
-		Color line = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_LINE].getColor();
+		Color bg = ((Color) UIManager.get("Menu.background")).brighter();
+		double lum = this.getColorRelativeLuminance(bg);
+		Color fg = lum > 255/2.0 ? Color.black: Color.white;
+		Color line = TextAreaDefaults.getDefaults().lineHighlightColor;
 		Color selection = SyntaxUtilities.getCurrentSyntaxStyles()[Token.EDITOR_SELECTION].getColor();
-		Color fg = new Color(255 - bg.getRed(), 255 - bg.getGreen(), 255 - bg.getBlue());
 
 		setForeground(fg);
 		setBackground(bg);
@@ -695,5 +708,17 @@ public class TextAreaPainter extends JComponent implements TabExpander {
 		setCaretColor(fg);
 		setSelectionColor(selection);
 		setLineHighlightColor(line);
+	}
+
+	/**
+	 * <p>Use the Color to get the relative luminance and try
+	 * to guess if the color is dark or not based on the result.
+	 * More details: <a href="https://en.wikipedia.org/wiki/Relative_luminance">https://en.wikipedia.org/wiki/Relative_luminance</a></p>
+	 *
+	 * @param color Color
+	 * @return relative luminance
+	 */
+	private double getColorRelativeLuminance(@NotNull Color color) {
+		return 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
 	}
 }
