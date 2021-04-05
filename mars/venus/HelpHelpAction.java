@@ -40,6 +40,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
+import com.sun.istack.internal.NotNull;
 import mars.Globals;
 import mars.assembler.Directives;
 import mars.mips.instructions.Instruction;
@@ -90,7 +91,7 @@ public class HelpHelpAction extends GuiAction {
 	private Dimension getSize() { return new Dimension(800, 600); }
 
 	// Light gray background color for alternating lines of the instruction lists
-	static Color altBackgroundColor = new Color(0xEE, 0xEE, 0xEE);
+	static Color altBackgroundColor = new Color(0x808080);
 
 	/**
 	 * Separates Instruction name descriptor from detailed (operation) description
@@ -259,6 +260,7 @@ public class HelpHelpAction extends GuiAction {
 		final JLabel helpRemarksLabel = new JLabel(helpRemarks, SwingConstants.CENTER);
 		helpRemarksLabel.setOpaque(true);
 		helpRemarksLabel.setBackground(Color.decode("0x" + helpRemarksColor));
+		helpRemarksLabel.setForeground(Color.black); // more clear to read
 		final JScrollPane operandsScrollPane = new JScrollPane(helpRemarksLabel,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		mipsHelpInfo.add(operandsScrollPane, BorderLayout.NORTH);
@@ -350,17 +352,34 @@ public class HelpHelpAction extends GuiAction {
 		{
 			final String s = value.toString();
 			setText(s);
+			Color bg;
+			Color fg;
+			double lum;
 			if (isSelected) {
-				setBackground(list.getSelectionBackground());
-				setForeground(list.getSelectionForeground());
+				bg = list.getSelectionBackground();
 			} else {
-				setBackground(index % 2 == 0 ? altBackgroundColor : list.getBackground());
-				setForeground(list.getForeground());
+				bg = index % 2 == 0 ? altBackgroundColor : list.getBackground();
 			}
+			lum = this.getColorRelativeLuminance(bg);
+			fg = lum > 255/2.0 ? Color.black: Color.white;
+			setBackground(bg);
+			setForeground(fg);
 			setEnabled(list.isEnabled());
 			setFont(list.getFont());
 			setOpaque(true);
 			return this;
+		}
+
+		/**
+		 * <p>Use the Color to get the relative luminance and try
+		 * to guess if the color is dark or not based on the result.
+		 * More details: <a href="https://en.wikipedia.org/wiki/Relative_luminance">https://en.wikipedia.org/wiki/Relative_luminance</a></p>
+		 *
+		 * @param color Color
+		 * @return relative luminance
+		 */
+		private double getColorRelativeLuminance(@NotNull Color color) {
+			return 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
 		}
 	}
 
